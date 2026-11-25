@@ -1,0 +1,6 @@
+{
+  "name": "clipnear", "version": "0.1.0", "private": true,
+  "workspaces": ["apps/client", "apps/api"],
+  "scripts": {"dev:api": "npm run dev -w @clipnear/api", "dev:web": "npm run web -w client", "test": "npm run test -w @clipnear/api", "typecheck": "npm run typecheck -w client", "build:web": "npm run build:web -w client"},
+  "engines": {"node": ">=22.13"}
+}

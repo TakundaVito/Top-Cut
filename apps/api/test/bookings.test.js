@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createApp} from '../src/app.js';
+import {barbers} from '../src/domain.js';
+test('Supabase mode fails closed without configuration',()=>{assert.throws(()=>createApp({mode:'supabase',url:'',key:''}),/required/);});
+test('private Supabase endpoints require a token before database access',async()=>{const server=createApp({mode:'supabase',url:'https://example.supabase.co',key:'test-anon-key'}).listen(0);await new Promise(r=>server.once('listening',r));try{const response=await fetch(`http://localhost:${server.address().port}/bookings`);assert.equal(response.status,401);}finally{server.close();}});
+test('API rejects invalid inputs, conflicting writes and returns booking history',async()=>{const server=createApp({mode:'demo'}).listen(0);await new Promise(r=>server.once('listening',r));const url=`http://localhost:${server.address().port}`;try{assert.equal((await fetch(url+'/barbers?lat=bad')).status,400);const payload={barberId:barbers[0].id,service:'Skin fade',start:'2099-01-02T07:00:00.000Z'};const book=()=>fetch(url+'/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const responses=await Promise.all([book(),book()]);assert.deepEqual(responses.map(r=>r.status).sort(),[201,409]);const history=await (await fetch(url+'/bookings')).json();assert.equal(history.length,1);assert.equal((await fetch(url+`/bookings/${history[0].id}/cancel`,{method:'POST'})).status,200);assert.equal((await book()).status,201);}finally{server.close();}});

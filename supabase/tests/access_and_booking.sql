@@ -1,0 +1,11 @@
+-- Staging verification checklist. Supply real Auth users and a configured barber.
+-- 1. As anon: search_barbers and available_slots succeed; direct provider and booking SELECT fail.
+-- 2. As customer A: create_booking succeeds for a valid returned slot.
+-- 3. As customer B: A's booking is not returned by SELECT and cancel_booking(A_booking) fails.
+-- 4. Run two create_booking calls for the same barber and overlapping interval concurrently.
+--    Exactly one succeeds; the second must fail without inserting another record.
+-- 5. A cancels their future confirmed booking; the slot becomes available again.
+-- 6. An expired or unapproved barber produces no public search result or available slot.
+-- 7. Time off, closed days, invalid slot boundaries and dates beyond 60 days reject booking.
+-- 8. Modify a service price after a booking; the existing price snapshot stays unchanged.
+-- These are manual staging checks, not a claim that live database tests have run.
